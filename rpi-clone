@@ -1,6 +1,12 @@
 #!/bin/bash
 
 VERSION=1.4
+# Original script :
+#	https://github.com/billw2/rpi-clone/blob/master/rpi-clone
+#
+# Version 1.4_spa
+#	* Traducción al español
+#	* Spanish translation
 # Version 1.4	2016/03/23
 #	* Use -F on mkfs.ext4 and just avoid the question.
 # Version 1.3	2016/03/16
@@ -36,14 +42,14 @@ SRC_ROOT_PARTITION_TYPE=`parted /dev/mmcblk0 -ms p | grep "^2" | cut -f 5 -d:`
 
 if [ `id -u` != 0 ]
 then
-    echo -e "$PGM needs to be run as root.\n"
+    echo -e "$PGM necesita ejecutarse como root (SUDO)\n"
     exit 1
 fi
 
 if ! rsync --version > /dev/null
 then
-	echo -e "\nOoops! rpi-clone needs the rsync program but cannot find it."
-	echo "Make sure rsync is installed:"
+	echo -e "\nOps! rpi-clone necesita la aplicacion rsync para funcionar, pero no puede encontrarse."
+	echo "Verifique que esta instalado, de lo contrario, puede instalarlo de la siguiente manera:"
 	echo "    $ sudo apt-get update"
 	echo -e "    $ sudo apt-get install rsync\n"
 	exit 0
@@ -54,8 +60,8 @@ then
 	HAVE_FSCK_VFAT="yes"
 else
 
-	echo "[Note] fsck.vfat was not found."
-	echo "It is recommended to install dosfstools:"
+	echo "[Nota] no se encontro fsck.vfat."
+	echo "Es recomendable instalar dosfstools:"
 	echo "    $ sudo apt-get update"
 	echo "    $ sudo apt-get install dosfstools"
 fi
@@ -63,8 +69,8 @@ fi
 usage()
 	{
 	echo ""
-	echo "usage: $PGM sdN {-f|--force-initialize} {-v|--verbose} {-x}"
-	echo "    Example:  $PGM sda"
+	echo "uso: $PGM sdN {-f|--force-initialize} {-v|--verbose} {-x}"
+	echo "    Ejemplo:  $PGM sda"
 	echo "    -v - list all files as they are copied."
 	echo "    -f - force initialize the destination partitions"
 	echo "    -x - use set -x for very verbose bash shell script debugging"
@@ -120,7 +126,7 @@ do
 		*)
 			if [ "$DST_DISK" != "" ]
 			then
-				echo "Bad args"
+				echo "Argumentos no validos"
 				usage
 			fi
 			DST_DISK=$1
@@ -147,9 +153,9 @@ fi
 
 unmount_or_abort()
 	{
-	echo -n "Do you want to unmount $1? (yes/no): "
+	echo -n "Quieres desmontar $1? (si/no): "
 	read resp
-	if [ "$resp" = "y" ] || [ "$resp" = "yes" ]
+	if [ "$resp" = "y" ] || [ "$resp" = "si" ]
 	then
 		if ! umount $1
 		then
