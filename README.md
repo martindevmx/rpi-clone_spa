@@ -1,4 +1,5 @@
 
+Original README from Bill Wilson https://github.com/billw2/
 rpi-clone is a shell script that will back up (clone using dd and rsync)
 a running Raspberry Pi file system to a destination SD card 'sdN' plugged
 into a Pi USB port (via a USB card reader).
