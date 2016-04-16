@@ -71,7 +71,7 @@ usage()
 	echo ""
 	echo "uso: $PGM sdN {-f|--force-initialize} {-v|--verbose} {-x}"
 	echo "    Ejemplo:  $PGM sda"
-	echo "    -v - enlita todos los archivos que se copian - con detalles"
+	echo "    -v - enlista todos los archivos que se copian - con detalles"
 	echo "    -f - fuerza la inicializacion de las particiones destino"
 	echo "    -x - utiliza -x para el modo detallado de depuracion"
 	echo ""
@@ -145,9 +145,9 @@ fi
 if ! cat /proc/partitions | grep -q $DST_DISK
 then
 	echo "No existe el disco '$DST_DISK'."
-	echo "Plug the destination SD card into a card reader connected to a"
-	echo "USB port.  If it does not show up  as '$DST_DISK', then do a"
-	echo -e "'cat /proc/partitions' to see where it might be.\n"
+	echo "Inserta la SDcard destino a un lector de tarjeta conectado a"
+	echo "un puerto USB.  Sino se muestra como el disco '$DST_DISK', teclea"
+	echo -e "'cat /proc/partitions' para saber donde se encuentra.\n"
 	exit 0
 fi
 
@@ -159,12 +159,12 @@ unmount_or_abort()
 	then
 		if ! umount $1
 		then
-			echo "Sorry, $PGM could not unmount $1."
-			echo -e "Aborting!\n"
+			echo "Vaya! $PGM no se pudo desmontar $1."
+			echo -e "Cancelando!\n"
 			exit 0
 		fi
 	else
-		echo -e "Aborting!\n"
+		echo -e "Cancelando!\n"
 		exit 0
 	fi
 	}
@@ -179,7 +179,7 @@ DST_BOOT_CURMOUNT=`fgrep "$DST_BOOT_PARTITION " /etc/mtab | cut -f 2 -d ' ' `
 
 if [ "$DST_ROOT_CURMOUNT" != "" ] || [ "$DST_BOOT_CURMOUNT" != "" ]
 then
-	echo "A destination partition is busy (mounted).  Mount status:"
+	echo "La particion destino esta ocupada (montada).  Estado del montaje :"
 	echo "    $DST_ROOT_PARTITION:  $DST_ROOT_CURMOUNT"
 	echo "    $DST_BOOT_PARTITION:  $DST_BOOT_CURMOUNT"
 	if [ "$DST_BOOT_CURMOUNT" != "" ]
@@ -196,8 +196,8 @@ fi
 TEST_MOUNTED=`fgrep " $CLONE " /etc/mtab | cut -f 1 -d ' ' `
 if [ "$TEST_MOUNTED" != "" ]
 then
-	echo "This script uses $CLONE for mounting filesystems, but"
-	echo "$CLONE is already mounted with $TEST_MOUNTED."
+	echo "Este script utiliza $CLONE para montar los archivos del sistema, pero"
+	echo "$CLONE ya se encuentra montado con $TEST_MOUNTED."
 	unmount_or_abort $CLONE 
 fi
 
@@ -208,7 +208,7 @@ then
 	then
 		mkdir $CLONE
 	else
-		echo "$MNT_MOUNT is currently mounted on /mnt."
+		echo "$MNT_MOUNT esta actualmente montando en /mnt."
 		unmount_or_abort /mnt
 		mkdir $CLONE
 	fi
@@ -250,24 +250,24 @@ DST_BOOT_PARTITION_TYPE=`parted /dev/$DST_DISK -ms p 2>/dev/null \
 DST_ROOT_PARTITION_TYPE=`parted /dev/$DST_DISK -ms p 2>/dev/null \
 		| grep "^2" | cut -f 5 -d:`
 
-CLONE_MODE="rsync modified files to existing $DST_DISK file systems"
+CLONE_MODE="rsync modifica los archivos existentes a $DST_DISK archivos de sistema"
 
 if [ "$DST_BOOT_PARTITION_TYPE" != "$SRC_BOOT_PARTITION_TYPE" ] || \
    [ "$DST_ROOT_PARTITION_TYPE" != "$SRC_ROOT_PARTITION_TYPE" ] || \
    [ "$FORCE_INITIALIZE" = "true" ]
 then
-	CLONE_MODE="rsync all files to $DST_DISK root file system"
+	CLONE_MODE="rsync todos los archivos a $DST_DISK la raiz del sistema (root)"
 	echo ""
 	if [ "$FORCE_INITIALIZE" = "true" ]
 	then
-		echo "Forcing a partition initialization of destination disk $DST_DISK"
+		echo "Forzando la inicializacion de una particion del disco destino $DST_DISK"
 	else
-		echo "The destination disk $DST_DISK partition table does not"
-		echo "match the booted disk /dev/mmcblk0 partition table so a"
-		echo "destination disk initialize is required."
+		echo "El disco destino $DST_DISK no contiene la tabla"
+		echo "que coincide con el disco de arranque /dev/mmcblk0 en la tabla de operaciones"
+		echo "la inicializacion del disco es requerida."
 	fi
 
-	echo "The existing destination disk '$DST_DISK' partitions are:"
+	echo "El disco destino '$DST_DISK' contiene las particiones:"
 	parted /dev/$DST_DISK -s unit MB p 2>/dev/null \
 		| sed "/^Model/d ; /^Sector/d ; /^Disk Flags/d"
 
@@ -280,12 +280,12 @@ then
 #		echo -e "  ... Cannot find a destination root file system of type: $SRC_ROOT_PARTITION_TYPE\n"
 #	fi
 
-	echo "*** All data on destination disk $DST_DISK will be overwritten! ***"
+	echo "*** Todo los datos del disco detino $DST_DISK seran sobrescritos! ***"
 	echo ""
-	echo -n "Do you want to initialize the destination disk /dev/$DST_DISK? (yes/no): "
+	echo -n "Quieres inicializar el disco destino /dev/$DST_DISK? (si/no): "
 
 	read resp
-	if [ "$resp" = "y" ] || [ "$resp" = "yes" ]
+	if [ "$resp" = "s" ] || [ "$resp" = "si" ]
 	then
 		# Image onto the destination disk a beginning fragment of the
 		# running SD card file structure that spans at least more than
@@ -298,7 +298,7 @@ then
 		DD_COUNT=`expr $PART2_START + 8`
 
 		echo ""
-		echo "Imaging the partition structure, copying $DD_COUNT megabytes..."
+		echo "Calculando la estructura de la particion, copiando $DD_COUNT megabytes..."
 		sync
 		dd if=/dev/mmcblk0 of=/dev/$DST_DISK bs=1M count=$DD_COUNT
 
@@ -306,7 +306,7 @@ then
 		# "Volume was not properly unmounted" warnings.
 		if [ "$HAVE_FSCK_VFAT" = "yes" ]
 		then
-			echo "Running fsck on $DST_BOOT_PARTITION..."
+			echo "Ejecutando fsck en $DST_BOOT_PARTITION..."
 			fsck -p $DST_BOOT_PARTITION &> /dev/null
 		fi
 
@@ -314,27 +314,28 @@ then
 		# maybe the wrong size for the destination SD card.  So fdisk it to
 		# make it fill the rest of the disk and mkfs it to clean it out.
 		#
-		echo "Sizing partition 2 (root partition) to use all SD card space..."
+		echo "Calculando el tamanio de la particion 2 (particion root) para utilizar"
+		echo "todo el espacio disponible de la SDcard..."
 		expand_rootfs
 		mkfs.ext4 -F $DST_ROOT_PARTITION
 
 		echo ""
-		echo "/dev/$DST_DISK is initialized and resized.  Its partitions are:"
+		echo "/dev/$DST_DISK esta inicializandose y redimensionando. Las particiones estan en:"
 #		fdisk -l /dev/$DST_DISK | grep $DST_DISK
 		parted /dev/$DST_DISK unit MB p \
 			| sed "/^Model/d ; /^Sector/d ; /^Disk Flags/d"
 
 		SRC_ROOT_VOL_NAME=`e2label /dev/mmcblk0p2`
 		echo ""
-		echo "Your booted /dev/mmcblk0p2 rootfs existing label: $SRC_ROOT_VOL_NAME"
-		echo -n "You may enter a label for the destination rootfs $DST_ROOT_PARTITION: "
+		echo "Etiqueta del booteo existente rootfs /dev/mmcblk0p2 : $SRC_ROOT_VOL_NAME"
+		echo -n "Puede introducir una etiqueta para rootfs $DST_ROOT_PARTITION: "
 		read resp
 		if [ "$resp" != "" ]
 		then
 			e2label $DST_ROOT_PARTITION $resp
 		fi
 	else
-		echo -e "Aborting\n"
+		echo -e "Cancelando\n"
 		exit 0
 	fi
 fi
@@ -351,22 +352,22 @@ fi
 
 echo ""
 echo "======== Clone Summary ========"
-echo "Clone mode               :  $CLONE_MODE"
-echo "Clone destination disk   :  $DST_DISK"
-echo "Clone destination rootfs :  $DST_ROOT_PARTITION ($DST_ROOT_VOL_NAME) on ${CLONE}"
-echo "Clone destination bootfs :  $DST_BOOT_PARTITION on ${CLONE}/boot"
-echo "Verbose mode             :  $VERBOSE"
+echo "Modo de clonado              	:  $CLONE_MODE"
+echo "Disco destino del clonado	   	:  $DST_DISK"
+echo "Destino del clonado de rootfs	:  $DST_ROOT_PARTITION ($DST_ROOT_VOL_NAME) on ${CLONE}"
+echo "Destino del clonado bootfs	:  $DST_BOOT_PARTITION on ${CLONE}/boot"
+echo "Modo detallado           		:  $VERBOSE"
 echo "==============================="
 
 
 # If this is an SD card initialization, can watch progress of the clone
 # in another terminal with:  watch df -h
 #
-echo -n "Final check, is it Ok to proceed with the clone (yes/no)?: "
+echo -n "Chequeo final, esta todo bien, continuar con el clonado (si/no)?: "
 read resp
-if [ "$resp" != "y" ] && [ "$resp" != "yes" ]
+if [ "$resp" != "s" ] && [ "$resp" != "si" ]
 then
-	echo -e "Aborting the disk clone.\n"
+	echo -e "Cancelando la clonacion.\n"
 	exit 0
 fi
 
@@ -378,10 +379,10 @@ fi
 
 # Mount destination filesystems.
 
-echo "=> Mounting $DST_ROOT_PARTITION ($DST_ROOT_VOL_NAME) on $CLONE"
+echo "=> Montando $DST_ROOT_PARTITION ($DST_ROOT_VOL_NAME) en $CLONE"
 if ! mount $DST_ROOT_PARTITION $CLONE
 then
-	echo -e "Mount failure of $DST_ROOT_PARTITION, aborting!\n"
+	echo -e "Montaje fallido de $DST_ROOT_PARTITION, cancelando!\n"
 	exit 0
 fi
 
@@ -390,11 +391,11 @@ then
 	mkdir $CLONE/boot
 fi
 
-echo "=> Mounting $DST_BOOT_PARTITION on $CLONE/boot"
+echo "=> Montando $DST_BOOT_PARTITION en $CLONE/boot"
 if ! mount $DST_BOOT_PARTITION $CLONE/boot
 then
 	umount $CLONE
-	echo -e "Mount failure of $DST_BOOT_PARTITION, aborting!\n"
+	echo -e "Montaje fallido de $DST_BOOT_PARTITION, cancelando!\n"
 	exit 0
 fi
 
@@ -419,8 +420,8 @@ START_TIME=`date '+%H:%M:%S'`
 # file systems from the rsync.
 #
 sync
-echo "Starting the filesystem rsync to $DST_DISK"
-echo -n "(This may take several minutes)..."
+echo "Iniciando el rsycn de archivos de sistema a $DST_DISK"
+echo -n "(Esto puede tomar bastante tiempo)..."
 rsync $RSYNC_OPTIONS --delete \
 		$EXCLUDE_SWAPFILE \
 		--exclude '.gvfs' \
@@ -468,17 +469,17 @@ rm -f $CLONE/etc/udev/rules.d/70-persistent-net.rules
 
 DATE=`date '+%F %H:%M'`
 
-echo "$DATE  $HOSTNAME $PGM : clone to $DST_DISK ($DST_ROOT_VOL_NAME)" \
+echo "$DATE  $HOSTNAME $PGM : clonar a $DST_DISK ($DST_ROOT_VOL_NAME)" \
 		>> $CLONE_LOG
-echo "$DATE  $HOSTNAME $PGM : clone to $DST_DISK ($DST_ROOT_VOL_NAME)" \
+echo "$DATE  $HOSTNAME $PGM : clonar a $DST_DISK ($DST_ROOT_VOL_NAME)" \
 		>> $CLONE/$CLONE_LOG
 
 
 STOP_TIME=`date '+%H:%M:%S'`
 
 echo ""
-echo "*** Done with clone to /dev/$DST_DISK ***"
-echo "    Started: $START_TIME    Finished: $STOP_TIME"
+echo "*** Terminado el clonado a /dev/$DST_DISK ***"
+echo "    Comenzado: $START_TIME    Terminado: $STOP_TIME"
 echo ""
 
 # Pause before unmounting in case I want to inspect the clone results
@@ -486,7 +487,7 @@ echo ""
 # Eg. modify $CLONE/etc/hostname, $CLONE/etc/network/interfaces, etc
 # if I'm cloning into a card to be installed on another Pi.
 #
-echo -n "Hit Enter when ready to unmount the /dev/$DST_DISK partitions..."
+echo -n "Pulsa Enter cuando estes listo para desmontar las particiones... /dev/$DST_DISK "
 read resp
 
 echo "desmontando $CLONE/boot"
