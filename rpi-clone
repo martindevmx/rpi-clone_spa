@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=1.4
+VERSION=1.4_spa
 # Original script :
 #	https://github.com/billw2/rpi-clone/blob/master/rpi-clone
 #
@@ -48,7 +48,7 @@ fi
 
 if ! rsync --version > /dev/null
 then
-	echo -e "\nOps! rpi-clone necesita la aplicacion rsync para funcionar, pero no puede encontrarse."
+	echo -e "\nVaya! rpi-clone necesita la aplicacion rsync para funcionar, pero no puede encontrarse."
 	echo "Verifique que esta instalado, de lo contrario, puede instalarlo de la siguiente manera:"
 	echo "    $ sudo apt-get update"
 	echo -e "    $ sudo apt-get install rsync\n"
@@ -71,9 +71,9 @@ usage()
 	echo ""
 	echo "uso: $PGM sdN {-f|--force-initialize} {-v|--verbose} {-x}"
 	echo "    Ejemplo:  $PGM sda"
-	echo "    -v - list all files as they are copied."
-	echo "    -f - force initialize the destination partitions"
-	echo "    -x - use set -x for very verbose bash shell script debugging"
+	echo "    -v - enlita todos los archivos que se copian - con detalles"
+	echo "    -f - fuerza la inicializacion de las particiones destino"
+	echo "    -x - utiliza -x para el modo detallado de depuracion"
 	echo ""
 	echo "    Clone (rsync) a running Raspberry Pi file system to a destination"
 	echo "    SD card 'sdN' plugged into a Pi USB port (via a USB card reader)."
@@ -144,7 +144,7 @@ fi
 
 if ! cat /proc/partitions | grep -q $DST_DISK
 then
-	echo "Destination disk '$DST_DISK' does not exist."
+	echo "No existe el disco '$DST_DISK'."
 	echo "Plug the destination SD card into a card reader connected to a"
 	echo "USB port.  If it does not show up  as '$DST_DISK', then do a"
 	echo -e "'cat /proc/partitions' to see where it might be.\n"
@@ -155,7 +155,7 @@ unmount_or_abort()
 	{
 	echo -n "Quieres desmontar $1? (si/no): "
 	read resp
-	if [ "$resp" = "y" ] || [ "$resp" = "si" ]
+	if [ "$resp" = "s" ] || [ "$resp" = "si" ]
 	then
 		if ! umount $1
 		then
@@ -489,10 +489,10 @@ echo ""
 echo -n "Hit Enter when ready to unmount the /dev/$DST_DISK partitions..."
 read resp
 
-echo "unmounting $CLONE/boot"
+echo "desmontando $CLONE/boot"
 umount $CLONE/boot
 
-echo "unmounting $CLONE"
+echo "desmontando $CLONE"
 umount $CLONE
 
 
